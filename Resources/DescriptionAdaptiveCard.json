@@ -1,0 +1,28 @@
+﻿{
+	"$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+	"type": "AdaptiveCard",
+	"version": "1.0",
+	"body": [
+		{
+			"type": "TextBlock",
+			"size": "medium",
+			"weight": "bolder",
+			"text": "Please describe your problem.",
+			"horizontalAlignment": "center"
+		},
+    {
+      "type": "Input.Text",
+      "placeholder": "Description",
+      "style": "text",
+      "isMultiline": true,
+      "maxLength": 0,
+      "id": "description"
+    }
+	],
+	"actions": [
+    {
+      "type": "Action.Submit",
+      "title": "Submit"
+    }
+	]
+}

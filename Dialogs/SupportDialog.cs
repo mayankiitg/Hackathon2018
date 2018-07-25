@@ -5,22 +5,74 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AdaptiveCards;
 using System.IO;
+using SimpleEchoBot.Dialogs;
+using Microsoft.Bot.Builder.FormFlow;
+using System.Threading;
+using SimpleEchoBot.Utils;
+
+public enum SupportDialogState
+{
+    ShowContactCard,
+    ReceivedContactCard,
+    SupportFormDone
+}
+
+
 
 [Serializable]
 public class SupportDialog : IDialog<object>
 {
+    SupportDialogState state;
+
     public async Task StartAsync(IDialogContext context)
     {
+        state = SupportDialogState.ShowContactCard;
         context.Wait(MessageReceivedAsync);
     }
 
     public async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> argument)
     {
         var activity = await argument;
-        await this.DisplayContactCard(context);
-        context.Wait(MessageReceivedAsync);
+        if (this.state == SupportDialogState.ShowContactCard)
+        {
+            await this.DisplayContactCard(context);
+            this.state = SupportDialogState.ReceivedContactCard;
+            context.Wait(this.MessageReceivedAsync);
+        }
+        else if(this.state == SupportDialogState.ReceivedContactCard)
+        {
+            var contactInfo = activity.Value;
+            string errorInfo = null;
+            if (validatedata(contactInfo, out errorInfo))
+            {
+                
+                await context.Forward(MakeSupportFormDialog(), resumeAfterSupportFormDialog, activity, CancellationToken.None);
+            }
+            else
+            {
+
+            }
+        }
+        else if (this.state == SupportDialogState.SupportFormDone)
+        {
+
+        }
     }
 
+    private async Task resumeAfterSupportFormDialog(IDialogContext context, IAwaitable<object> result)
+    {
+        var formResult = await result;
+        //context.Done(true);
+        this.state = SupportDialogState.SupportFormDone;
+        AdaptiveCardUtils.DisplayAdaptiveCard(context, "Resources/DescriptionAdaptiveCard.json");
+        context.Wait(this.MessageReceivedAsync);
+    }
+
+    public bool validatedata(object contactInfo, out string errorInfo)
+    {
+        errorInfo = null;
+        return true;
+    }
     public async Task DisplayContactCard(IDialogContext context)
     {
         var replyMessage = context.MakeMessage();
@@ -52,4 +104,10 @@ public class SupportDialog : IDialog<object>
 
         return attachment;
     }
+
+    public static IDialog<SupportForm> MakeSupportFormDialog()
+    {
+        return Chain.From(() => FormDialog.FromForm(SupportForm.BuildForm));
+    }
+
 }
