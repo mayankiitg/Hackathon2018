@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using AdaptiveCards;
 
 namespace SimpleEchoBot.Dialogs
 {
@@ -63,10 +64,19 @@ namespace SimpleEchoBot.Dialogs
     [Serializable]
     public class SupportForm
     {
+        [Prompt("Please enter your {&} in  +XX-XXXXXXXXXX format")]
         public string MobileNumber;
+
+        [Prompt("Please enter your valid {&} where we can contact you")]
         public string EmailAddress;
+
+        [Prompt("Help us narrow down scope of your problem {||}")]
         public ProblemTypeOptions? problemTypeOptions;
+
+        [Prompt("Select the closest category {||}")]
         public string category;
+
+        [Prompt("Helpo us understand better by describing your problem in few words")]
         public string Description;
 
 
@@ -152,7 +162,7 @@ namespace SimpleEchoBot.Dialogs
     [Serializable]
     public class SupportDialog : IDialog<object>
     {
-        private int state = 0;
+       
 
         public async Task StartAsync(IDialogContext context)
         {
@@ -162,14 +172,9 @@ namespace SimpleEchoBot.Dialogs
         public async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> argument)
         {
 
-            /*var message = await argument;
-            var welcomeMessage = context.MakeMessage();
-            welcomeMessage.Text = "Welcome to bot Hero Card Demo";
+   
 
-            await context.PostAsync(welcomeMessage);*/
-
-            await this.DisplayHeroCard(context);
-
+            await this.DisplayContactCard(context);
             context.Wait(MessageReceivedAsync);
 
             /*PromptDialog.Choice(
@@ -180,34 +185,34 @@ namespace SimpleEchoBot.Dialogs
                 promptStyle: PromptStyle.Auto);*/
         }
 
-        public async Task DisplayHeroCard(IDialogContext context)
+
+        public async Task DisplayContactCard(IDialogContext context)
         {
             var replyMessage = context.MakeMessage();
-            Attachment attachment = GetProfileHeroCard(); ;
+            Attachment attachment = GetConactInfoCard(); ;
             replyMessage.Attachments = new List<Attachment> { attachment };
             await context.PostAsync(replyMessage);
         }
 
-        private static Attachment GetProfileHeroCard()
-        {
-            var heroCard = new HeroCard
-            {
-                // title of the card  
-                Title = "Team Services Assistant",
-                //subtitle of the card  
-                Subtitle = "Powered by Microsoft",
-                // navigate to page , while tab on card  
-                //Tap = new CardAction(ActionTypes.OpenUrl, "Learn More", value: "http://www.devenvexe.com"),
-                //Detail Text  
-                Text = "Hi User, How may I help you today?",
-                // list of  Large Image  
-                //Images = new List<CardImage> { new CardImage("http://csharpcorner.mindcrackerinc.netdna-cdn.com/UploadFile/AuthorImage/jssuthahar20170821011237.jpg") },
-                // list of buttons   
-                Buttons = new List<CardAction> { new CardAction(ActionTypes.PostBack, title: "Support", value: "Support"), new CardAction(ActionTypes.ImBack, title: "Feedback", value: "Feedback") }
-            };
 
-            return heroCard.ToAttachment();
+
+        public Attachment GetConactInfoCard()
+        {
+            string json = "{\"$schema\":\"http://adaptivecards.io/schemas/adaptive-card.json\",\"type\":\"AdaptiveCard\",\"version\":\"1.0\",\"body\":[{\"type\":\"ColumnSet\",\"columns\":[{\"type\":\"Column\",\"width\":2,\"items\":[{\"type\":\"TextBlock\",\"text\":\"Tell us about yourself\",\"weight\":\"bolder\",\"size\":\"medium\"},{\"type\":\"TextBlock\",\"text\":\"We just need a few more details to get you booked for the trip of a lifetime!\",\"isSubtle\":true,\"wrap\":true},{\"type\":\"TextBlock\",\"text\":\"Don't worry, we'll never share or sell your information.\",\"isSubtle\":true,\"wrap\":true,\"size\":\"small\"},{\"type\":\"TextBlock\",\"text\":\"Your name\",\"wrap\":true},{\"type\":\"Input.Text\",\"id\":\"myName\",\"placeholder\":\"Last, First\"},{\"type\":\"TextBlock\",\"text\":\"Your email\",\"wrap\":true},{\"type\":\"Input.Text\",\"id\":\"myEmail\",\"placeholder\":\"youremail@example.com\",\"style\":\"email\"},{\"type\":\"TextBlock\",\"text\":\"Phone Number\"},{\"type\":\"Input.Text\",\"id\":\"myTel\",\"placeholder\":\"xxx.xxx.xxxx\",\"style\":\"tel\"}]},{\"type\":\"Column\",\"width\":1,\"items\":[{\"type\":\"Image\",\"url\":\"https://upload.wikimedia.org/wikipedia/commons/b/b2/Diver_Silhouette%2C_Great_Barrier_Reef.jpg\",\"size\":\"auto\"}]}]}],\"actions\":[{\"type\":\"Action.Submit\",\"title\":\"Submit\"}]}";
+
+            // Parse the JSON 
+            AdaptiveCardParseResult result = AdaptiveCard.FromJson(json);
+
+            // Get card from result
+            AdaptiveCard card = result.Card;
+            Attachment attachment = new Attachment()
+            {
+                ContentType = AdaptiveCard.ContentType,
+                Content = card
+            };
+            return attachment;
         }
+  
 
     }
 }

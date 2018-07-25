@@ -28,7 +28,7 @@ namespace SimpleEchoBot.Dialogs
             string userMessage = activity.Text.ToLower();
             if (userMessage.Contains("support"))
             {
-                await context.Forward(MakeSupportDialogue(), resumeAfterSupport, activity, CancellationToken.None);
+                await context.Forward(new SupportDialog(), resumeAfterSupport, activity, CancellationToken.None);
             }
             else if (userMessage.Contains("feedback"))
             {
@@ -36,7 +36,7 @@ namespace SimpleEchoBot.Dialogs
             }
             else
             {
-                await this.DisplayHeroCard(context);
+                await this.DisplayWelcomeCard(context);
                 context.Wait(MessageReceivedAsync);
             }
 
@@ -55,11 +55,11 @@ namespace SimpleEchoBot.Dialogs
             context.Wait(this.MessageReceivedAsync);
         }
 
-        public async Task DisplayHeroCard(IDialogContext context)
+        public async Task DisplayWelcomeCard(IDialogContext context)
         {
             var replyMessage = context.MakeMessage();
             replyMessage.Text = "User: " + context.Activity.From.Id + "," + context.Activity.From.Name + "Url: " + context.Activity.ServiceUrl;
-            Attachment attachment = GetProfileHeroCard();
+            Attachment attachment = GetProfileHeroCard(); 
             replyMessage.Attachments = new List<Attachment> { attachment };
             await context.PostAsync(replyMessage);
         }
@@ -87,7 +87,10 @@ namespace SimpleEchoBot.Dialogs
 
         public static IDialog<SupportForm> MakeSupportDialogue()
         {
+
             return Chain.From(() => FormDialog.FromForm(SupportForm.BuildForm));
         }
+
+  
     }
 }
