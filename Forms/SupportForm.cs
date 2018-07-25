@@ -59,16 +59,11 @@ namespace SimpleEchoBot.Dialogs
     [Serializable]
     public class SupportForm
     {
-        //public Dictionary<string, string> userDataState;
-
-        //[Prompt("Help us narrow down scope of your problem {||}")]
+        [Prompt("Help us narrow down scope of your problem {||}")]
         public ProblemTypeOptions? problemTypeOptions;
 
-        //[Prompt("Select the closest category {||}")]
+        [Prompt("Select the closest category {||}")]
         public string category;
-
-        //[Prompt("Help us understand better by describing your problem in few words")]
-        public string Description;
 
 
         public static IForm<SupportForm> BuildForm()
@@ -95,7 +90,6 @@ namespace SimpleEchoBot.Dialogs
                         }
                         return Task.FromResult(true);
                     }))
-                .Field(nameof(Description))
                 .OnCompletion(callback)
                 .Build();
         }
@@ -103,8 +97,8 @@ namespace SimpleEchoBot.Dialogs
         private static Task callback(IDialogContext context, SupportForm form)
         {
             // do something with this form. Send email.
-            context.PostAsync("We have recorded your support issue.");
-            return Task.FromResult(true);
+            //context.PostAsync("We have recorded your support issue.");
+            return Task.FromResult(form.problemTypeOptions);
         }
     }
     public static class SupportDetails

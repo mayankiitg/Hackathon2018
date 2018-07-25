@@ -8,12 +8,16 @@ using System.IO;
 using SimpleEchoBot.Dialogs;
 using Microsoft.Bot.Builder.FormFlow;
 using System.Threading;
+using SimpleEchoBot.Utils;
 
 public enum SupportDialogState
 {
     ShowContactCard,
-    ReceivedContactCard
+    ReceivedContactCard,
+    SupportFormDone
 }
+
+
 
 [Serializable]
 public class SupportDialog : IDialog<object>
@@ -49,11 +53,18 @@ public class SupportDialog : IDialog<object>
 
             }
         }
+        else if (this.state == SupportDialogState.SupportFormDone)
+        {
+
+        }
     }
 
     private async Task resumeAfterSupportFormDialog(IDialogContext context, IAwaitable<object> result)
     {
+        var formResult = await result;
         //context.Done(true);
+        this.state = SupportDialogState.SupportFormDone;
+        AdaptiveCardUtils.DisplayAdaptiveCard(context, "Resources/DescriptionAdaptiveCard.json");
         context.Wait(this.MessageReceivedAsync);
     }
 
