@@ -6,6 +6,8 @@ using Microsoft.Bot.Builder.Dialogs;
 using System.Web.Http.Description;
 using System.Net.Http;
 using SimpleEchoBot.Dialogs;
+using Microsoft.Bot.Builder.FormFlow;
+using System.Collections.Generic;
 
 namespace Microsoft.Bot.Sample.SimpleEchoBot
 {
@@ -20,11 +22,14 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
         [ResponseType(typeof(void))]
         public virtual async Task<HttpResponseMessage> Post([FromBody] Activity activity)
         {
+
             // check if activity is of type message
             if (activity != null && activity.GetActivityType() == ActivityTypes.Message)
             {
-
+                string userMessage = activity.Text.ToLower();
+                
                 await Conversation.SendAsync(activity, () => new WelcomeDialog());
+                
             }
             else
             {
@@ -60,6 +65,11 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
             }
 
             return null;
+        }
+
+        public static IDialog<SupportForm> MakeSupportDialogue()
+        {
+            return Chain.From(() => FormDialog.FromForm(SupportForm.BuildForm));
         }
     }
 }

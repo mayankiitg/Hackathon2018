@@ -5,12 +5,15 @@ using Microsoft.Bot.Connector;
 using Microsoft.Bot.Builder.Dialogs;
 using System.Net.Http;
 using System.Collections.Generic;
+using Microsoft.Bot.Builder.FormFlow;
+using System.Threading;
 
 namespace SimpleEchoBot.Dialogs
 {
     [Serializable]
     public class WelcomeDialog : IDialog<object>
     {
+        int state = 1;
 
         public async Task StartAsync(IDialogContext context)
         {
@@ -19,19 +22,35 @@ namespace SimpleEchoBot.Dialogs
 
         public async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> argument)
         {
-            /*var message = await argument;
-            var welcomeMessage = context.MakeMessage();
-            welcomeMessage.Text = "Welcome to bot Hero Card Demo";
+            IMessageActivity activity = await argument;
+            string userMessage = activity.Text.ToLower();
+            if (userMessage.Contains("support"))
+            {
+                await context.Forward(MakeSupportDialogue(), resumeAfterSupport, activity, CancellationToken.None);
+            }
+            else if (userMessage.Contains("feedback"))
+            {
 
-            await context.PostAsync(welcomeMessage);*/
+            }
+            else
+            {
+                await this.DisplayHeroCard(context);
+                context.Wait(MessageReceivedAsync);
+            }
 
-            await this.DisplayHeroCard(context);
+            //context.Wait(MessageReceivedAsync);
+
             /*PromptDialog.Choice(
                 context,
                 resumeHandler,
                 new[] { "Support", "Feedback" },
                 "Hi User, How may I help you today?\n",
                 promptStyle: PromptStyle.Auto);*/
+        }
+
+        private async Task resumeAfterSupport(IDialogContext context, IAwaitable<object> result)
+        {
+            context.Wait(this.MessageReceivedAsync);
         }
 
         public async Task DisplayHeroCard(IDialogContext context)
@@ -57,17 +76,15 @@ namespace SimpleEchoBot.Dialogs
                 // list of  Large Image  
                 //Images = new List<CardImage> { new CardImage("http://csharpcorner.mindcrackerinc.netdna-cdn.com/UploadFile/AuthorImage/jssuthahar20170821011237.jpg") },
                 // list of buttons   
-                Buttons = new List<CardAction> { new CardAction(ActionTypes.MessageBack, "Support"), new CardAction(ActionTypes.MessageBack, "Feedback") }
+                Buttons = new List<CardAction> { new CardAction(ActionTypes.PostBack, title: "Support", value: "Support"), new CardAction(ActionTypes.ImBack, title: "Feedback", value:  "Feedback") }
             };
 
             return heroCard.ToAttachment();
         }
 
-        private async Task resumeHandler(IDialogContext context, IAwaitable<string> result)
+        public static IDialog<SupportForm> MakeSupportDialogue()
         {
-            var userResponse = await result;
-
-
+            return Chain.From(() => FormDialog.FromForm(SupportForm.BuildForm));
         }
     }
 }
