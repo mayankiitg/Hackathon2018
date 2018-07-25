@@ -17,11 +17,9 @@ public class SupportDialog : IDialog<object>
     public async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> argument)
     {
         var activity = await argument;
-
         await this.DisplayContactCard(context);
         context.Wait(MessageReceivedAsync);
     }
-
 
     public async Task DisplayContactCard(IDialogContext context)
     {

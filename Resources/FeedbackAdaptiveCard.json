@@ -1,0 +1,114 @@
+﻿{
+	"$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+	"type": "AdaptiveCard",
+	"version": "1.0",
+	"body": [
+		{
+			"type": "TextBlock",
+			"size": "medium",
+			"weight": "bolder",
+			"text": "Thank you for taking time to submit your feedback",
+			"horizontalAlignment": "center"
+		},
+		{
+			"type": "TextBlock",
+			"text": "What is the category for the feedback?"
+		},
+		{
+			"type": "Input.ChoiceSet",
+			"id": "CompactSelectVal",
+			"style": "compact",
+			"value": "1",
+			"choices": [
+				{
+					"title": "Category 1",
+					"value": "1"
+				},
+				{
+					"title": "Category 2",
+					"value": "2"
+				},
+				{
+					"title": "Category 3",
+					"value": "3"
+				}
+			]
+		},
+		{
+			"type": "TextBlock",
+			"text": "Would you like to provide some description?"
+		},
+		{
+			"type": "Input.Text",
+			"placeholder": "Description",
+			"style": "text",
+			"isMultiline": true,
+			"maxLength": 0,
+			"id": "MultiLineVal"
+		},
+
+		{
+			"type": "TextBlock",
+			"text": "How would you rate your experince with us?"
+		},
+		{
+			"type": "Input.ChoiceSet",
+			"id": "SingleSelectVal",
+			"style": "expanded",
+			"value": "1",
+			"choices": [
+				{
+					"title": "Very Poor",
+					"value": "1"
+				},
+				{
+					"title": "Poor",
+					"value": "2"
+				},
+				{
+					"title": "Good",
+					"value": "3"
+				},
+				{
+					"title": "Very Good",
+					"value": "4"
+				},
+				{
+					"title": "Nailed it!",
+					"value": "5"
+				}
+			]
+		}
+	],
+	"actions": [
+		{
+			"type": "Action.Submit",
+			"title": "Submit",
+			"data": {
+				"id": "1234567890"
+			}
+		},
+		{
+			"type": "Action.ShowCard",
+			"title": "Show Card",
+			"card": {
+				"type": "AdaptiveCard",
+				"body": [
+					{
+						"type": "Input.Text",
+						"placeholder": "enter comment",
+						"style": "text",
+						"maxLength": 0,
+						"id": "CommentVal"
+					}
+				],
+				"actions": [
+					{
+						"type": "Action.Submit",
+						"title": "OK"
+					}
+				]
+			}
+		}
+	]
+}

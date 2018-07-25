@@ -13,8 +13,6 @@ namespace SimpleEchoBot.Dialogs
     [Serializable]
     public class WelcomeDialog : IDialog<object>
     {
-        int state = 1;
-
         public async Task StartAsync(IDialogContext context)
         {
             context.Wait(MessageReceivedAsync);
@@ -26,11 +24,11 @@ namespace SimpleEchoBot.Dialogs
             string userMessage = activity.Text.ToLower();
             if (userMessage.Contains("support"))
             {
-                await context.Forward(new SupportDialog(), resumeAfterSupport, activity, CancellationToken.None);
+                await context.Forward(new SupportDialog(), ResumeAfterActivityEnd, activity, CancellationToken.None);
             }
             else if (userMessage.Contains("feedback"))
             {
-
+                await context.Forward(new FeedbackDialog(), ResumeAfterActivityEnd, activity, CancellationToken.None);
             }
             else
             {
@@ -39,9 +37,9 @@ namespace SimpleEchoBot.Dialogs
             }
         }
 
-        private async Task resumeAfterSupport(IDialogContext context, IAwaitable<object> result)
+        private async Task ResumeAfterActivityEnd(IDialogContext context, IAwaitable<object> result)
         {
-            context.Wait(this.MessageReceivedAsync);
+            context.Wait(MessageReceivedAsync);
         }
 
         public async Task DisplayWelcomeCard(IDialogContext context)
