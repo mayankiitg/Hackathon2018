@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using System.Web.Http;
-
 using Microsoft.Bot.Connector;
 using Microsoft.Bot.Builder.Dialogs;
 using System.Web.Http.Description;
@@ -33,7 +32,7 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
             }
             else
             {
-                HandleSystemMessage(activity);
+                await HandleSystemMessage(activity);
             }
             return new HttpResponseMessage(System.Net.HttpStatusCode.Accepted);
         }
