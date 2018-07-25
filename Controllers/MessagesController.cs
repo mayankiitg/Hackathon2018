@@ -46,29 +46,7 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
             }
             else if (activity.Type == ActivityTypes.ConversationUpdate)
             {
-                /*
-                IConversationUpdateActivity update = activity;
-                if (update.MembersAdded.Any())
-                {
-                    foreach (var newMemeber in update.MembersAdded)
-                    {
-                        if (newMemeber.Id != activity.Recipient.Id)
-                        {
-                            ConnectorClient client = new ConnectorClient(new Uri(activity.ServiceUrl));
-                            var reply = activity.CreateReply();
-                            Attachment attachment = WelcomeDialog.GetProfileHeroCard();
-                            reply.Attachments = new List<Attachment> { attachment };
-                            await client.Conversations.ReplyToActivityAsync(reply);
-
-
-                        }
-                    }
-                }*/
-
-                // await Conversation.SendAsync(activity, () => new WelcomeDialog());
-                // Handle conversation state changes, like members being added and removed
-                // Use Activity.MembersAdded and Activity.MembersRemoved and Activity.Action for info
-                // Not available in all channels
+                
             }
             else if (activity.Type == ActivityTypes.ContactRelationUpdate)
             {
