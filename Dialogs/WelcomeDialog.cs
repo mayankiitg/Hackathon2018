@@ -17,6 +17,8 @@ namespace SimpleEchoBot.Dialogs
 
         public async Task StartAsync(IDialogContext context)
         {
+            //await context.PostAsync("Hello I am a bot");
+            //await this.DisplayHeroCard(context);
             context.Wait(MessageReceivedAsync);
         }
 
@@ -61,7 +63,7 @@ namespace SimpleEchoBot.Dialogs
             await context.PostAsync(replyMessage);
         }
 
-        private static Attachment GetProfileHeroCard()
+        public static Attachment GetProfileHeroCard()
         {
             var heroCard = new HeroCard
             {
