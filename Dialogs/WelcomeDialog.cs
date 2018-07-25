@@ -17,8 +17,6 @@ namespace SimpleEchoBot.Dialogs
 
         public async Task StartAsync(IDialogContext context)
         {
-            //await context.PostAsync("Hello I am a bot");
-            //await this.DisplayHeroCard(context);
             context.Wait(MessageReceivedAsync);
         }
 
@@ -39,15 +37,6 @@ namespace SimpleEchoBot.Dialogs
                 await this.DisplayWelcomeCard(context);
                 context.Wait(MessageReceivedAsync);
             }
-
-            //context.Wait(MessageReceivedAsync);
-
-            /*PromptDialog.Choice(
-                context,
-                resumeHandler,
-                new[] { "Support", "Feedback" },
-                "Hi User, How may I help you today?\n",
-                promptStyle: PromptStyle.Auto);*/
         }
 
         private async Task resumeAfterSupport(IDialogContext context, IAwaitable<object> result)
@@ -58,7 +47,7 @@ namespace SimpleEchoBot.Dialogs
         public async Task DisplayWelcomeCard(IDialogContext context)
         {
             var replyMessage = context.MakeMessage();
-            replyMessage.Text = "User: " + context.Activity.From.Id + "," + context.Activity.From.Name + "Url: " + context.Activity.ServiceUrl;
+            //replyMessage.Text = "User: " + context.Activity.From.Id + "," + context.Activity.From.Name + "Url: " + context.Activity.ServiceUrl;
             Attachment attachment = GetProfileHeroCard(); 
             replyMessage.Attachments = new List<Attachment> { attachment };
             await context.PostAsync(replyMessage);

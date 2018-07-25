@@ -1,218 +1,57 @@
 ﻿using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Builder.FormFlow;
-using Microsoft.Bot.Builder.FormFlow.Advanced;
 using Microsoft.Bot.Connector;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using AdaptiveCards;
+using System.IO;
 
-namespace SimpleEchoBot.Dialogs
+[Serializable]
+public class SupportDialog : IDialog<object>
 {
-
-    public enum ProblemTypeOptions
+    public async Task StartAsync(IDialogContext context)
     {
-        BuildAndRelease,
-        VersionControl,
-        WorkItems,
-        Notification
+        context.Wait(MessageReceivedAsync);
     }
 
-    public enum BuildAndReleaseCategory
+    public async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> argument)
     {
-        RunningBuilds,
-        ConfigurationEndpoints,
-        DeployTasks,
-        AgentPoolsAndQueues,
-        AzureDeployment
-    }
-    public enum VersionControlCategory
-    {
-        BranchingAndMerging,
-        Git,
-        DeployTasks,
-        CodeLens,
-        CodeReview,
-        SourceCodeIncorrectOrMissing,
-        TeamFoundationVersionControl
+        var activity = await argument;
+
+        await this.DisplayContactCard(context);
+        context.Wait(MessageReceivedAsync);
     }
 
-    public enum WorkItemsCategory
+
+    public async Task DisplayContactCard(IDialogContext context)
     {
-        Backlogs,
-        Boards,
-        Charts,
-        WorkItemPerformance,
-        QueryDesigner,
-        CustomizingWorkTracking,
-        WorkItemPermissions
+        var replyMessage = context.MakeMessage();
+        Attachment attachment = GetConactInfoCard(); ;
+        replyMessage.Attachments = new List<Attachment> { attachment };
+        await context.PostAsync(replyMessage);
     }
 
-    public enum NotificationsCategory
+
+
+    public Attachment GetConactInfoCard()
     {
-        BuildNotifications,
-        CodeReview,
-        RequestFeedback,
-        WorkItemPerformance,
-        QueryDesigner,
-        CustomizingWorkTracking,
-        WorkItemPermissions
-    }
-
-    [Serializable]
-    public class SupportForm
-    {
-        [Prompt("Please enter your {&} in  +XX-XXXXXXXXXX format")]
-        public string MobileNumber;
-
-        [Prompt("Please enter your valid {&} where we can contact you")]
-        public string EmailAddress;
-
-        [Prompt("Help us narrow down scope of your problem {||}")]
-        public ProblemTypeOptions? problemTypeOptions;
-
-        [Prompt("Select the closest category {||}")]
-        public string category;
-
-        [Prompt("Helpo us understand better by describing your problem in few words")]
-        public string Description;
-
-
-        public static IForm<SupportForm> BuildForm()
+        string json = "{\"$schema\":\"http://adaptivecards.io/schemas/adaptive-card.json\",\"type\":\"AdaptiveCard\",\"version\":\"1.0\",\"body\":[{\"type\":\"ColumnSet\",\"columns\":[{\"type\":\"Column\",\"width\":2,\"items\":[{\"type\":\"TextBlock\",\"text\":\"Tell us about yourself\",\"weight\":\"bolder\",\"size\":\"medium\"},{\"type\":\"TextBlock\",\"text\":\"We just need a few more details to get you booked for the trip of a lifetime!\",\"isSubtle\":true,\"wrap\":true},{\"type\":\"TextBlock\",\"text\":\"Don't worry, we'll never share or sell your information.\",\"isSubtle\":true,\"wrap\":true,\"size\":\"small\"},{\"type\":\"TextBlock\",\"text\":\"Your name\",\"wrap\":true},{\"type\":\"Input.Text\",\"id\":\"myName\",\"placeholder\":\"Last, First\"},{\"type\":\"TextBlock\",\"text\":\"Your email\",\"wrap\":true},{\"type\":\"Input.Text\",\"id\":\"myEmail\",\"placeholder\":\"youremail@example.com\",\"style\":\"email\"},{\"type\":\"TextBlock\",\"text\":\"Phone Number\"},{\"type\":\"Input.Text\",\"id\":\"myTel\",\"placeholder\":\"xxx.xxx.xxxx\",\"style\":\"tel\"}]},{\"type\":\"Column\",\"width\":1,\"items\":[{\"type\":\"Image\",\"url\":\"https://upload.wikimedia.org/wikipedia/commons/b/b2/Diver_Silhouette%2C_Great_Barrier_Reef.jpg\",\"size\":\"auto\"}]}]}],\"actions\":[{\"type\":\"Action.Submit\",\"title\":\"Submit\"}]}";
+        using (StreamReader r = new StreamReader(System.AppDomain.CurrentDomain.BaseDirectory + "Resources/ContactAdaptiveCard.json"))
         {
-            var builder = new FormBuilder<SupportForm>();
-
-            return builder
-                .Field(nameof(MobileNumber))
-                .Field(nameof(EmailAddress))
-                .Field(nameof(problemTypeOptions))
-                .Field(new FieldReflector<SupportForm>(nameof(category))
-                    .SetType(null)
-                    .SetActive((state) => true)
-                    .SetDefine((state, field) =>
-                    {
-                        if (state.problemTypeOptions != null && SupportDetails.ProblemTypeCategoryMapping.ContainsKey(state.problemTypeOptions.Value))
-                        {
-                            var options = SupportDetails.ProblemTypeCategoryMapping[state.problemTypeOptions.Value];
-                            foreach (var option in options)
-                            {
-                                field.
-                                AddDescription(option, option)
-                                .AddTerms(option, option);
-                            }
-                            
-                        }
-                        return Task.FromResult(true);
-                    }))
-                .Field(nameof(Description))
-                .OnCompletion(callback)
-                .Build();
+            json = r.ReadToEnd();
         }
 
-        private static Task callback(IDialogContext context, SupportForm state)
+        // Parse the JSON 
+        AdaptiveCardParseResult result = AdaptiveCard.FromJson(json);
+
+        // Get card from result
+        AdaptiveCard card = result.Card;
+        Attachment attachment = new Attachment()
         {
-            // do something with this form. Send email.
-            context.PostAsync("We have recorded your support issue.");
-            return Task.FromResult(true);
-        }
-    }
-    public static class SupportDetails
-    {
-        public static Dictionary<ProblemTypeOptions, List<string>> ProblemTypeCategoryMapping;
-        static SupportDetails()
-        {
+            ContentType = AdaptiveCard.ContentType,
+            Content = card
+        };
 
-            ProblemTypeCategoryMapping = new Dictionary<ProblemTypeOptions, List<string>>();
-            ProblemTypeCategoryMapping[ProblemTypeOptions.BuildAndRelease] = new List<string>() { "Running Builds", "Configuration Service Endpoints", "Deploy Tasks", "Agent Pools and Queues", "Azure Deployment" };
-            ProblemTypeCategoryMapping[ProblemTypeOptions.VersionControl] = new  List<string>() { "Brancing and Merging", "Git", "Deploy Tasks", "CodeLens", "Code Review","Source Code Incorrect or Missing", "Team Foundation Version Control"  };
-            ProblemTypeCategoryMapping[ProblemTypeOptions.WorkItems] = new List<string>() { "Backlogs", "Boards", "Charts", "Work Item Performance", "Query Designer", "Customizing Work Tracking", "," };
-            ProblemTypeCategoryMapping[ProblemTypeOptions.Notification] = new List<string>() { "Build Notifications", "Code Review", "Request Feedback", "Work Item Performance", "Query Designer", "Customizing Work Tracking", "Work Item Permissions" };
-
-        }
-
-    }
-    public enum StateNames
-    {
-        DialogStart, // will ask for contact
-        ContactInfo, // will ask for area in which he is facing issue.
-        ProblemType,   // will ask for categor of this area in which he is facing problem.
-        Category, // will ask for description of the problem.
-        IncidentDetails, // will ask for attachments.
-        Attachments, // Will say support is created and 
-    }
-
-    
-
-
-    /*
-    private List<string> questions = ["Select the scope of the problem.",
-        "Help us narrow down the scope",
-        "Describe your problem. Ex: the warning/error you are seeing",
-        "Can you provide some screenshots?"];
-        */
-    public class PromptMessage
-    {
-        public string dataKey;
-        public string promptMessage;
-        public List<string> promptOptions;
-    }
-
-    [Serializable]
-    public class SupportDialog : IDialog<object>
-    {
-       
-
-        public async Task StartAsync(IDialogContext context)
-        {
-            context.Wait(MessageReceivedAsync);
-        }
-
-        public async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> argument)
-        {
-
-   
-
-            await this.DisplayContactCard(context);
-            context.Wait(MessageReceivedAsync);
-
-            /*PromptDialog.Choice(
-                context,
-                resumeHandler,
-                new[] { "Support", "Feedback" },
-                "Hi User, How may I help you today?\n",
-                promptStyle: PromptStyle.Auto);*/
-        }
-
-
-        public async Task DisplayContactCard(IDialogContext context)
-        {
-            var replyMessage = context.MakeMessage();
-            Attachment attachment = GetConactInfoCard(); ;
-            replyMessage.Attachments = new List<Attachment> { attachment };
-            await context.PostAsync(replyMessage);
-        }
-
-
-
-        public Attachment GetConactInfoCard()
-        {
-            string json = "{\"$schema\":\"http://adaptivecards.io/schemas/adaptive-card.json\",\"type\":\"AdaptiveCard\",\"version\":\"1.0\",\"body\":[{\"type\":\"ColumnSet\",\"columns\":[{\"type\":\"Column\",\"width\":2,\"items\":[{\"type\":\"TextBlock\",\"text\":\"Tell us about yourself\",\"weight\":\"bolder\",\"size\":\"medium\"},{\"type\":\"TextBlock\",\"text\":\"We just need a few more details to get you booked for the trip of a lifetime!\",\"isSubtle\":true,\"wrap\":true},{\"type\":\"TextBlock\",\"text\":\"Don't worry, we'll never share or sell your information.\",\"isSubtle\":true,\"wrap\":true,\"size\":\"small\"},{\"type\":\"TextBlock\",\"text\":\"Your name\",\"wrap\":true},{\"type\":\"Input.Text\",\"id\":\"myName\",\"placeholder\":\"Last, First\"},{\"type\":\"TextBlock\",\"text\":\"Your email\",\"wrap\":true},{\"type\":\"Input.Text\",\"id\":\"myEmail\",\"placeholder\":\"youremail@example.com\",\"style\":\"email\"},{\"type\":\"TextBlock\",\"text\":\"Phone Number\"},{\"type\":\"Input.Text\",\"id\":\"myTel\",\"placeholder\":\"xxx.xxx.xxxx\",\"style\":\"tel\"}]},{\"type\":\"Column\",\"width\":1,\"items\":[{\"type\":\"Image\",\"url\":\"https://upload.wikimedia.org/wikipedia/commons/b/b2/Diver_Silhouette%2C_Great_Barrier_Reef.jpg\",\"size\":\"auto\"}]}]}],\"actions\":[{\"type\":\"Action.Submit\",\"title\":\"Submit\"}]}";
-
-            // Parse the JSON 
-            AdaptiveCardParseResult result = AdaptiveCard.FromJson(json);
-
-            // Get card from result
-            AdaptiveCard card = result.Card;
-            Attachment attachment = new Attachment()
-            {
-                ContentType = AdaptiveCard.ContentType,
-                Content = card
-            };
-            return attachment;
-        }
-  
-
+        return attachment;
     }
 }

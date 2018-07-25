@@ -180,6 +180,7 @@
     <Compile Include="Dialogs\EchoDialog.cs" />
     <Compile Include="Dialogs\SupportDialog.cs" />
     <Compile Include="Dialogs\WelcomeDialog.cs" />
+    <Compile Include="Forms\SupportForm.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -187,6 +188,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
+    <Content Include="Resources\ContactAdaptiveCard.json" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

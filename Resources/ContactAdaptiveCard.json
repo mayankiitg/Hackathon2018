@@ -1,0 +1,61 @@
+﻿{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.0",
+  "body": [
+    {
+      "type": "ColumnSet",
+      "columns": [
+        {
+          "type": "Column",
+          "width": 2,
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "Let's start with your contact info.",
+              "weight": "bolder",
+              "size": "medium"
+            },
+            {
+              "type": "TextBlock",
+              "text": "Name",
+              "wrap": true
+            },
+            {
+              "type": "Input.Text",
+              "id": "name",
+              "placeholder": "John Doe"
+            },
+            {
+              "type": "TextBlock",
+              "text": "Your email",
+              "wrap": true
+            },
+            {
+              "type": "Input.Text",
+              "id": "email",
+              "placeholder": "johndoe@example.com",
+              "style": "email"
+            },
+            {
+              "type": "TextBlock",
+              "text": "Phone Number"
+            },
+            {
+              "type": "Input.Text",
+              "id": "myTel",
+              "placeholder": "XX-XXXXXXXXXX",
+              "style": "tel"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.Submit",
+      "title": "Submit"
+    }
+  ]
+}

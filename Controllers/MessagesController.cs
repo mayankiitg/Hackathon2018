@@ -29,10 +29,7 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
             // check if activity is of type message
             if (activity != null && activity.GetActivityType() == ActivityTypes.Message)
             {
-                string userMessage = activity.Text.ToLower();
-
                 await Conversation.SendAsync(activity, () => new WelcomeDialog());
-
             }
             else
             {
