@@ -58,7 +58,8 @@ namespace SimpleEchoBot.Dialogs
         public async Task DisplayHeroCard(IDialogContext context)
         {
             var replyMessage = context.MakeMessage();
-            Attachment attachment = GetProfileHeroCard(); ;
+            replyMessage.Text = "User: " + context.Activity.From.Id + "," + context.Activity.From.Name + "Url: " + context.Activity.ServiceUrl;
+            Attachment attachment = GetProfileHeroCard();
             replyMessage.Attachments = new List<Attachment> { attachment };
             await context.PostAsync(replyMessage);
         }

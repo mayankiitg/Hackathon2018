@@ -50,6 +50,7 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
             }
             else if (activity.Type == ActivityTypes.ConversationUpdate)
             {
+                /*
                 IConversationUpdateActivity update = activity;
                 if (update.MembersAdded.Any())
                 {
@@ -66,7 +67,7 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
 
                         }
                     }
-                }
+                }*/
 
                 // await Conversation.SendAsync(activity, () => new WelcomeDialog());
                 // Handle conversation state changes, like members being added and removed
