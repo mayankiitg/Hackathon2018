@@ -73,13 +73,6 @@ namespace SimpleEchoBot.Dialogs
 
             return heroCard.ToAttachment();
         }
-
-        public static IDialog<SupportForm> MakeSupportDialogue()
-        {
-
-            return Chain.From(() => FormDialog.FromForm(SupportForm.BuildForm));
-        }
-
   
     }
 }

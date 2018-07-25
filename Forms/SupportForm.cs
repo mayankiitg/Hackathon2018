@@ -59,19 +59,15 @@ namespace SimpleEchoBot.Dialogs
     [Serializable]
     public class SupportForm
     {
-        [Prompt("Please enter your {&} in  +XX-XXXXXXXXXX format")]
-        public string MobileNumber;
+        //public Dictionary<string, string> userDataState;
 
-        [Prompt("Please enter your valid {&} where we can contact you")]
-        public string EmailAddress;
-
-        [Prompt("Help us narrow down scope of your problem {||}")]
+        //[Prompt("Help us narrow down scope of your problem {||}")]
         public ProblemTypeOptions? problemTypeOptions;
 
-        [Prompt("Select the closest category {||}")]
+        //[Prompt("Select the closest category {||}")]
         public string category;
 
-        [Prompt("Helpo us understand better by describing your problem in few words")]
+        //[Prompt("Help us understand better by describing your problem in few words")]
         public string Description;
 
 
@@ -80,8 +76,6 @@ namespace SimpleEchoBot.Dialogs
             var builder = new FormBuilder<SupportForm>();
 
             return builder
-                .Field(nameof(MobileNumber))
-                .Field(nameof(EmailAddress))
                 .Field(nameof(problemTypeOptions))
                 .Field(new FieldReflector<SupportForm>(nameof(category))
                     .SetType(null)
@@ -106,7 +100,7 @@ namespace SimpleEchoBot.Dialogs
                 .Build();
         }
 
-        private static Task callback(IDialogContext context, SupportForm state)
+        private static Task callback(IDialogContext context, SupportForm form)
         {
             // do something with this form. Send email.
             context.PostAsync("We have recorded your support issue.");
