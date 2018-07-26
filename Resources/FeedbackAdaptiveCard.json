@@ -19,20 +19,24 @@
 			"id": "Category",
 			"style": "compact",
 			"value": "1",
-			"choices": [
-				{
-					"title": "Category 1",
-					"value": "1"
-				},
-				{
-					"title": "Category 2",
-					"value": "2"
-				},
-				{
-					"title": "Category 3",
-					"value": "3"
-				}
-			]
+      "choices": [
+        {
+          "title": "BuildAndRelease",
+          "value": "1"
+        },
+        {
+          "title": "VersionControl",
+          "value": "2"
+        },
+        {
+          "title": "WorkItems",
+          "value": "3"
+        },
+        {
+          "title": "Notification",
+          "value": "4"
+        }
+      ]
 		},
 		{
 			"type": "TextBlock",

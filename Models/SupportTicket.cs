@@ -10,7 +10,6 @@ namespace SimpleEchoBot.Models
         public string AccountUrl;
         public string UserName;
         public string EmailAddress;
-        public string MobileNumber;
         public string AreaOfProblem;
         public string CategoryOfProblem;
         public string Description;
@@ -20,7 +19,6 @@ namespace SimpleEchoBot.Models
             this.AccountUrl = null;
             this.UserName = null;
             this.EmailAddress = null;
-            this.MobileNumber = null;
             this.AreaOfProblem = null;
             this.CategoryOfProblem = null;
             this.Description = null;

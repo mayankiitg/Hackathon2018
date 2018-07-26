@@ -76,14 +76,6 @@ namespace SimpleEchoBot.Utils
                     Value = ticket.EmailAddress
                 }
             );
-            patchDocument.Add(
-                new JsonPatchOperation()
-                {
-                    Operation = Operation.Add,
-                    Path = "/fields/agile2.MobileNumber",
-                    Value = ticket.MobileNumber
-                }
-            );
 
             try
             {

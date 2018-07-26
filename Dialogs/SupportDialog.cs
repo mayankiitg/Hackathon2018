@@ -89,7 +89,6 @@ public class SupportDialog : IDialog<object>
                 AccountUrl = accountUrl,
                 UserName = this.UserName,
                 EmailAddress = this.EmailAddress,
-                MobileNumber = this.MobileNumber,
                 AreaOfProblem = this.ProblemType,
                 CategoryOfProblem = this.Category,
                 Description = this.Description
