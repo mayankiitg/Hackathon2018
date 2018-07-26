@@ -14,10 +14,12 @@ namespace SimpleEchoBot.Utils
 {
     public class WorkItemUtils
     {
-        private static string collectionUri = "https://tenaciousakshi.visualstudio.com";
+        private static string collectionUri = "https://tenaciousakshi.visualstudio.com/";
         private static string pat = "35lh7c72vvwulhmjc2i6rsng7hxnkix7alawnrfzz4k4qerycbhq";
         private static string project = "HackthonProject";
-        public static WorkItem CreateSupportTicket(SupportTicket ticket)
+
+        // Returns workitem URL.
+        public static string CreateSupportTicket(SupportTicket ticket)
         {
             VssConnection connection = new VssConnection(new Uri(collectionUri), new VssBasicCredential("", pat));
             WorkItemTrackingHttpClient witClient = connection.GetClient<WorkItemTrackingHttpClient>();
@@ -39,7 +41,7 @@ namespace SimpleEchoBot.Utils
                 {
                     Operation = Operation.Add,
                     Path = "/fields/System.Description",
-                    Value = "Customer Account: " + ticket.AccountUrl + "Customer Email address: " + ticket.EmailAddress + "\n" + "Customer Mobile Number: " + ticket.MobileNumber + "\nDescription: " + ticket.Description
+                    Value = ticket.Description
                 }
             );
             patchDocument.Add(
@@ -86,11 +88,11 @@ namespace SimpleEchoBot.Utils
             try
             {
                 WorkItem result = witClient.CreateWorkItemAsync(patchDocument, project, "SupportTicket").Result;
-                return result;
+                return (collectionUri + project + "/_workitems/edit/" + result.Id);
             }
             catch (AggregateException ex)
             {
-                Console.WriteLine("Error creating bug: {0}", ex.InnerException.Message);
+                Console.WriteLine("Error creating the support ticket: {0}", ex.InnerException.Message);
                 return null;
             }
         }

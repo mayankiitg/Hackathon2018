@@ -77,28 +77,30 @@ public class SupportDialog : IDialog<object>
         }
         else if (this.state == SupportDialogState.SupportFormDone)
         {
+            this.Description = Utils.convertResponseToMap(activity.Value)[Constants.Description];
             SupportTicket ticket = new SupportTicket() {
                 AccountUrl = "",
-                UserName = "",
-                EmailAddress = "",
-                MobileNumber = "",
-                AreaOfProblem = "",
-                CategoryOfProblem = "",
-                Description = "asdsad",
-                attachmentUrls = null
+                UserName = this.UserName,
+                EmailAddress = this.EmailAddress,
+                MobileNumber = this.MobileNumber,
+                AreaOfProblem = this.ProblemType,
+                CategoryOfProblem = this.Category,
+                Description = this.Description
             };
 
-            var workItem = WorkItemUtils.CreateSupportTicket(ticket);
-            await context.PostAsync("Your support ticket has been created, you can track it using the following url:"+ workItem.Url);
+            var supportTicketUrl = WorkItemUtils.CreateSupportTicket(ticket);
+            await context.PostAsync("Your support ticket has been created, you can track it using the following url:"+ supportTicketUrl);
             context.Done(true);
             return;
         }
     }
 
-    private async Task resumeAfterSupportFormDialog(IDialogContext context, IAwaitable<object> result)
+    private async Task resumeAfterSupportFormDialog(IDialogContext context, IAwaitable<SupportForm> result)
     {
         var formResult = await result;
-        //context.Done(true);
+        this.ProblemType = formResult.problemTypeOptions.ToString();
+        this.Category = formResult.category;
+
         this.state = SupportDialogState.SupportFormDone;
         AdaptiveCardUtils.DisplayAdaptiveCard(context, "Resources/DescriptionAdaptiveCard.json");
         context.Wait(this.MessageReceivedAsync);
