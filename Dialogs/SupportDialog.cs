@@ -9,6 +9,10 @@ using SimpleEchoBot.Dialogs;
 using Microsoft.Bot.Builder.FormFlow;
 using System.Threading;
 using SimpleEchoBot.Utils;
+using SimpleEchoBot.Models;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Linq;
 
 public enum SupportDialogState
 {
@@ -17,22 +21,29 @@ public enum SupportDialogState
     SupportFormDone
 }
 
-
-
 [Serializable]
 public class SupportDialog : IDialog<object>
 {
     SupportDialogState state;
+    protected int retries = 0;
+    private string UserName;
+    private string EmailAddress;
+    private string MobileNumber;
+    private string Description;
+    private string ProblemType;
+    private string Category;
 
     public async Task StartAsync(IDialogContext context)
     {
         state = SupportDialogState.ShowContactCard;
-        context.Wait(MessageReceivedAsync);
+        //ticket = new SupportTicket();
+        context.Wait(this.MessageReceivedAsync);
     }
 
     public async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> argument)
     {
         var activity = await argument;
+        string errorInfo = null;
         if (this.state == SupportDialogState.ShowContactCard)
         {
             await this.DisplayContactCard(context);
@@ -42,7 +53,8 @@ public class SupportDialog : IDialog<object>
         else if(this.state == SupportDialogState.ReceivedContactCard)
         {
             var contactInfo = activity.Value;
-            string errorInfo = null;
+            var response = Utils.convertResponseToMap(contactInfo);
+            
             if (validatedata(contactInfo, out errorInfo))
             {
                 
@@ -50,7 +62,17 @@ public class SupportDialog : IDialog<object>
             }
             else
             {
-
+                if(this.retries < 3)
+                {
+                    this.retries++;
+                    await this.DisplayContactCard(context, errorInfo);
+                    context.Wait(this.MessageReceivedAsync);
+                    
+                }
+                else
+                {
+                    context.Done(true);
+                }
             }
         }
         else if (this.state == SupportDialogState.SupportFormDone)
@@ -70,22 +92,55 @@ public class SupportDialog : IDialog<object>
 
     public bool validatedata(object contactInfo, out string errorInfo)
     {
-        errorInfo = null;
-        return true;
+        StringBuilder builder = new StringBuilder();
+        Dictionary<string, string> variables = Utils.convertResponseToMap(contactInfo);
+        bool success = true;
+        if (string.IsNullOrEmpty(variables[Constants.ContactDetailsName]))
+        {
+            success = false;
+            builder.AppendLine("User Name Cannot Be Empty");
+        }
+        else
+        {
+            this.UserName = variables[Constants.ContactDetailsName];
+        }
+        this.MobileNumber = variables[Constants.ContactDetailsPhone];
+        
+        try
+        {
+            var email = new System.Net.Mail.MailAddress(variables[Constants.ContactDetailsEmail]);
+            this.EmailAddress = email.Address;
+        }
+        catch(Exception)
+        {
+            success = false;
+            builder.AppendLine("Please enter a valid email address");
+        }
+
+        if(Regex.Match(variables[Constants.ContactDetailsPhone], @"^(\+[0-9]{9})$").Success)
+        {
+            this.MobileNumber = variables[Constants.ContactDetailsPhone];
+        }
+        else
+        {
+            builder.AppendLine("Please enter a valid mobile number");
+        }
+        errorInfo = builder.ToString();
+        return success;
     }
-    public async Task DisplayContactCard(IDialogContext context)
+    public async Task DisplayContactCard(IDialogContext context, string errorInfo = null)
     {
         var replyMessage = context.MakeMessage();
-        Attachment attachment = GetConactInfoCard(); ;
+        Attachment attachment = GetConactInfoCard(errorInfo);
         replyMessage.Attachments = new List<Attachment> { attachment };
         await context.PostAsync(replyMessage);
     }
 
 
 
-    public Attachment GetConactInfoCard()
+    public Attachment GetConactInfoCard(string errorInfo)
     {
-        string json = "{\"$schema\":\"http://adaptivecards.io/schemas/adaptive-card.json\",\"type\":\"AdaptiveCard\",\"version\":\"1.0\",\"body\":[{\"type\":\"ColumnSet\",\"columns\":[{\"type\":\"Column\",\"width\":2,\"items\":[{\"type\":\"TextBlock\",\"text\":\"Tell us about yourself\",\"weight\":\"bolder\",\"size\":\"medium\"},{\"type\":\"TextBlock\",\"text\":\"We just need a few more details to get you booked for the trip of a lifetime!\",\"isSubtle\":true,\"wrap\":true},{\"type\":\"TextBlock\",\"text\":\"Don't worry, we'll never share or sell your information.\",\"isSubtle\":true,\"wrap\":true,\"size\":\"small\"},{\"type\":\"TextBlock\",\"text\":\"Your name\",\"wrap\":true},{\"type\":\"Input.Text\",\"id\":\"myName\",\"placeholder\":\"Last, First\"},{\"type\":\"TextBlock\",\"text\":\"Your email\",\"wrap\":true},{\"type\":\"Input.Text\",\"id\":\"myEmail\",\"placeholder\":\"youremail@example.com\",\"style\":\"email\"},{\"type\":\"TextBlock\",\"text\":\"Phone Number\"},{\"type\":\"Input.Text\",\"id\":\"myTel\",\"placeholder\":\"xxx.xxx.xxxx\",\"style\":\"tel\"}]},{\"type\":\"Column\",\"width\":1,\"items\":[{\"type\":\"Image\",\"url\":\"https://upload.wikimedia.org/wikipedia/commons/b/b2/Diver_Silhouette%2C_Great_Barrier_Reef.jpg\",\"size\":\"auto\"}]}]}],\"actions\":[{\"type\":\"Action.Submit\",\"title\":\"Submit\"}]}";
+        string json;
         using (StreamReader r = new StreamReader(System.AppDomain.CurrentDomain.BaseDirectory + "Resources/ContactAdaptiveCard.json"))
         {
             json = r.ReadToEnd();
@@ -95,7 +150,51 @@ public class SupportDialog : IDialog<object>
         AdaptiveCardParseResult result = AdaptiveCard.FromJson(json);
 
         // Get card from result
+
         AdaptiveCard card = result.Card;
+        if(errorInfo != null)
+        {
+            var columns = card.Body.OfType<AdaptiveColumnSet>().First();
+            var InputItems = columns.Columns.First().Items.OfType<AdaptiveTextInput>();
+            var textItems = columns.Columns.First().Items.OfType<AdaptiveTextBlock>();
+
+            foreach(var item in InputItems)
+            {
+                if (this.EmailAddress != null && item.Id == Constants.ContactDetailsEmail)
+                {
+                    item.Value = this.EmailAddress;
+                }
+
+                else if (this.MobileNumber != null && item.Id == Constants.ContactDetailsPhone)
+                {
+                    item.Value = this.MobileNumber;
+                }
+                else if (this.UserName != null && item.Id == Constants.ContactDetailsName)
+                {
+                    item.Value = this.UserName;
+                }              
+            }
+
+            foreach (var item in textItems)
+            {
+                if (this.EmailAddress == null && item.Id == Constants.ContactDetailsEmailtext)
+                {
+                    item.Text = "Email address should be valid";
+                    item.Color = AdaptiveTextColor.Warning;
+                }
+
+                else if (this.MobileNumber == null && item.Id == Constants.ContactDetailsPhoneText)
+                {
+                    item.Text = "Mobile number should be valid";
+                    item.Color = AdaptiveTextColor.Warning;
+                }
+                else if (this.UserName == null && item.Id == Constants.ContactDetailsNameText)
+                {
+                    item.Text = "Name should be valid";
+                    item.Color = AdaptiveTextColor.Warning;
+                }
+            }
+        }
         Attachment attachment = new Attachment()
         {
             ContentType = AdaptiveCard.ContentType,
