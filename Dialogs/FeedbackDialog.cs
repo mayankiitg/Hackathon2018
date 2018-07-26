@@ -1,10 +1,8 @@
 ﻿using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Connector;
 using SimpleEchoBot.Utils;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace SimpleEchoBot.Dialogs
 {
@@ -16,11 +14,34 @@ namespace SimpleEchoBot.Dialogs
             context.Wait(MessageReceivedAsync);
         }
 
-        private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<object> result)
+        private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> argument)
         {
-            var response = await result;
+            var response = await argument;
+            if (response != null && response.GetActivityType() == ActivityTypes.Message)
+            {
+                var feedbackSaved = await SaveFeedback(context, response.Value as Newtonsoft.Json.Linq.JObject);
+                if(feedbackSaved)
+                {
+                    await context.PostAsync("Thank you for your feedback");
+                    context.Done(true);
+                    return;
+                }
+            }
+
             await DisplayFeedbackCard(context);
             context.Wait(MessageReceivedAsync);
+        }
+
+        private async Task<Boolean> SaveFeedback(IDialogContext context, Newtonsoft.Json.Linq.JObject value)
+        {
+            if (value != null)
+            {
+                var children = value.Children<Newtonsoft.Json.Linq.JToken>();
+                //Save the information here
+                return true;
+            }
+
+            return false;
         }
 
         private async Task DisplayFeedbackCard(IDialogContext context)
