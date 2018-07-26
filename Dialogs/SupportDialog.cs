@@ -71,6 +71,7 @@ public class SupportDialog : IDialog<object>
                 }
                 else
                 {
+                    await context.PostAsync("Maximum retry limit exceeded. Please start again.");
                     context.Done(true);
                 }
             }
@@ -89,7 +90,7 @@ public class SupportDialog : IDialog<object>
             };
 
             var supportTicketUrl = WorkItemUtils.CreateSupportTicket(ticket);
-            await context.PostAsync("Your support ticket has been created, you can track it using the following url:"+ supportTicketUrl);
+            await DisplaySupportTicketCard(context, supportTicketUrl);
             context.Done(true);
             return;
         }
@@ -98,10 +99,9 @@ public class SupportDialog : IDialog<object>
     private async Task resumeAfterSupportFormDialog(IDialogContext context, IAwaitable<SupportForm> result)
     {
         var formResult = await result;
-        this.ProblemType = formResult.problemTypeOptions.ToString();
-        this.Category = formResult.category;
-
-        this.state = SupportDialogState.SupportFormDone;
+        ProblemType = formResult.problemTypeOptions.ToString();
+        Category = formResult.category;
+        state = SupportDialogState.SupportFormDone;
         AdaptiveCardUtils.DisplayAdaptiveCard(context, "Resources/DescriptionAdaptiveCard.json");
         context.Wait(this.MessageReceivedAsync);
     }
@@ -141,20 +141,27 @@ public class SupportDialog : IDialog<object>
         {
             builder.AppendLine("Please enter a valid mobile number");
         }
+
         errorInfo = builder.ToString();
         return success;
     }
     public async Task DisplayContactCard(IDialogContext context, string errorInfo = null)
     {
         var replyMessage = context.MakeMessage();
-        Attachment attachment = GetConactInfoCard(errorInfo);
+        Attachment attachment = GetContactCardInfo(errorInfo);
         replyMessage.Attachments = new List<Attachment> { attachment };
         await context.PostAsync(replyMessage);
     }
 
+    private async Task DisplaySupportTicketCard(IDialogContext context, string supportUrl)
+    {
+        var replyMessage = context.MakeMessage();
+        Attachment attachment = GetSupportTicketCard(supportUrl);
+        replyMessage.Attachments = new List<Attachment> { attachment };
+        await context.PostAsync(replyMessage);
+    }
 
-
-    public Attachment GetConactInfoCard(string errorInfo)
+    private Attachment GetContactCardInfo(string errorInfo)
     {
         string json;
         using (StreamReader r = new StreamReader(System.AppDomain.CurrentDomain.BaseDirectory + "Resources/ContactAdaptiveCard.json"))
@@ -220,9 +227,20 @@ public class SupportDialog : IDialog<object>
         return attachment;
     }
 
-    public static IDialog<SupportForm> MakeSupportFormDialog()
+    private static IDialog<SupportForm> MakeSupportFormDialog()
     {
         return Chain.From(() => FormDialog.FromForm(SupportForm.BuildForm));
+    }
+
+    public static Attachment GetSupportTicketCard(string supportTicketUrl)
+    {
+        var heroCard = new HeroCard
+        {
+            Text = "Your support ticket has been created. You can view the status of the ticket here.",
+            Buttons = new List<CardAction> { new CardAction(ActionTypes.OpenUrl, title: "Your support ticket", value: supportTicketUrl) }
+        };
+
+        return heroCard.ToAttachment();
     }
 
 }
