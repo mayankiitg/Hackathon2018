@@ -14,5 +14,8 @@ namespace SimpleEchoBot.Utils
         public const string ContactDetailsPhoneText = "phoneText";
         public const string ContactDetailsEmailtext = "emailText";
         public const string ContactDetailsNameText = "nameText";
+        public const string AreaOfProblem = "problemTypeOptions";
+        public const string CategoryOfProblem = "category";
+        public const string Description = "description";
     }
 }

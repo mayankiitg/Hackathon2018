@@ -56,9 +56,7 @@ namespace SimpleEchoBot.Dialogs
             string user = context.Activity.From.Id;
             var heroCard = new HeroCard
             {
-                // title of the card  
                 Title = "Team Services Assistant",
-                //subtitle of the card  
                 Subtitle = "Powered by Microsoft",
                 // navigate to page , while tab on card  
                 //Tap = new CardAction(ActionTypes.OpenUrl, "Learn More", value: "http://www.devenvexe.com"),

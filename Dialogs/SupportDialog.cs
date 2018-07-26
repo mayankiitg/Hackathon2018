@@ -71,12 +71,14 @@ public class SupportDialog : IDialog<object>
                 }
                 else
                 {
+                    await context.PostAsync("Maximum retry limit exceeded. Please start again.");
                     context.Done(true);
                 }
             }
         }
         else if (this.state == SupportDialogState.SupportFormDone)
         {
+            this.Description = Utils.convertResponseToMap(activity.Value)[Constants.Description];
             JToken value;
             string accountUrl = "";
             if ( context.Activity.From.Properties.TryGetValue("host", out value))
@@ -85,26 +87,27 @@ public class SupportDialog : IDialog<object>
             }
             SupportTicket ticket = new SupportTicket() {
                 AccountUrl = accountUrl,
-                UserName = "",
-                EmailAddress = "",
-                MobileNumber = "",
-                AreaOfProblem = "",
-                CategoryOfProblem = "",
-                Description = "asdsad"
+                UserName = this.UserName,
+                EmailAddress = this.EmailAddress,
+                MobileNumber = this.MobileNumber,
+                AreaOfProblem = this.ProblemType,
+                CategoryOfProblem = this.Category,
+                Description = this.Description
             };
 
-            var workItem = WorkItemUtils.CreateSupportTicket(ticket);
-            await context.PostAsync("Your support ticket has been created, you can track it using the following url:"+ workItem.Url);
+            var supportTicketUrl = WorkItemUtils.CreateSupportTicket(ticket);
+            await DisplaySupportTicketCard(context, supportTicketUrl);
             context.Done(true);
             return;
         }
     }
 
-    private async Task resumeAfterSupportFormDialog(IDialogContext context, IAwaitable<object> result)
+    private async Task resumeAfterSupportFormDialog(IDialogContext context, IAwaitable<SupportForm> result)
     {
         var formResult = await result;
-        //context.Done(true);
-        this.state = SupportDialogState.SupportFormDone;
+        ProblemType = formResult.problemTypeOptions.ToString();
+        Category = formResult.category;
+        state = SupportDialogState.SupportFormDone;
         AdaptiveCardUtils.DisplayAdaptiveCard(context, "Resources/DescriptionAdaptiveCard.json");
         context.Wait(this.MessageReceivedAsync);
     }
@@ -141,14 +144,20 @@ public class SupportDialog : IDialog<object>
     public async Task DisplayContactCard(IDialogContext context, string errorInfo = null)
     {
         var replyMessage = context.MakeMessage();
-        Attachment attachment = GetConactInfoCard(errorInfo);
+        Attachment attachment = GetContactCardInfo(errorInfo);
         replyMessage.Attachments = new List<Attachment> { attachment };
         await context.PostAsync(replyMessage);
     }
 
+    private async Task DisplaySupportTicketCard(IDialogContext context, string supportUrl)
+    {
+        var replyMessage = context.MakeMessage();
+        Attachment attachment = GetSupportTicketCard(supportUrl);
+        replyMessage.Attachments = new List<Attachment> { attachment };
+        await context.PostAsync(replyMessage);
+    }
 
-
-    public Attachment GetConactInfoCard(string errorInfo)
+    private Attachment GetContactCardInfo(string errorInfo)
     {
         string json;
         using (StreamReader r = new StreamReader(System.AppDomain.CurrentDomain.BaseDirectory + "Resources/ContactAdaptiveCard.json"))
@@ -205,9 +214,20 @@ public class SupportDialog : IDialog<object>
         return attachment;
     }
 
-    public static IDialog<SupportForm> MakeSupportFormDialog()
+    private static IDialog<SupportForm> MakeSupportFormDialog()
     {
         return Chain.From(() => FormDialog.FromForm(SupportForm.BuildForm));
+    }
+
+    public static Attachment GetSupportTicketCard(string supportTicketUrl)
+    {
+        var heroCard = new HeroCard
+        {
+            Text = "Your support ticket has been created. You can view the status of the ticket here.",
+            Buttons = new List<CardAction> { new CardAction(ActionTypes.OpenUrl, title: "Your support ticket", value: supportTicketUrl) }
+        };
+
+        return heroCard.ToAttachment();
     }
 
 }
