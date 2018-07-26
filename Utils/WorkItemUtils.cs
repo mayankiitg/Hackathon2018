@@ -15,7 +15,7 @@ namespace SimpleEchoBot.Utils
     public class WorkItemUtils
     {
         private static string collectionUri = "https://tenaciousakshi.visualstudio.com/";
-        private static string pat = "35lh7c72vvwulhmjc2i6rsng7hxnkix7alawnrfzz4k4qerycbhq";
+        private static string pat = "";
         private static string project = "HackthonProject";
 
         // Returns workitem URL.
