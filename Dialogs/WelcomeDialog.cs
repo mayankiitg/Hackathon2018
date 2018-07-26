@@ -70,6 +70,5 @@ namespace SimpleEchoBot.Dialogs
 
             return heroCard.ToAttachment();
         }
-  
     }
 }

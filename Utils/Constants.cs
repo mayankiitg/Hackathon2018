@@ -18,4 +18,12 @@ namespace SimpleEchoBot.Utils
         public const string CategoryOfProblem = "category";
         public const string Description = "description";
     }
+
+    public enum ProblemTypeOptions
+    {
+        BuildAndRelease,
+        VersionControl,
+        WorkItems,
+        Notification
+    }
 }

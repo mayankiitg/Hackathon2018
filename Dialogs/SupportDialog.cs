@@ -50,7 +50,7 @@ public class SupportDialog : IDialog<object>
             this.state = SupportDialogState.ReceivedContactCard;
             context.Wait(this.MessageReceivedAsync);
         }
-        else if(this.state == SupportDialogState.ReceivedContactCard)
+        else if(this.state == SupportDialogState.ReceivedContactCard) 
         {
             var contactInfo = activity.Value;
             var response = Utils.convertResponseToMap(contactInfo);
