@@ -11,12 +11,14 @@
           "width": 2,
           "items": [
             {
+              "id": "titleText",
               "type": "TextBlock",
               "text": "Let's start with your contact info.",
               "weight": "bolder",
               "size": "medium"
             },
             {
+              "id": "nameText",
               "type": "TextBlock",
               "text": "Name",
               "wrap": true
@@ -27,6 +29,7 @@
               "placeholder": "John Doe"
             },
             {
+              "id": "emailText",
               "type": "TextBlock",
               "text": "Your email",
               "wrap": true
@@ -38,13 +41,14 @@
               "style": "email"
             },
             {
+              "id" : "phoneText",
               "type": "TextBlock",
               "text": "Phone Number"
             },
             {
               "type": "Input.Text",
-              "id": "myTel",
-              "placeholder": "XX-XXXXXXXXXX",
+              "id": "phone",
+              "placeholder": "XXXXXXXXXX",
               "style": "tel"
             }
           ]

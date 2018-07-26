@@ -14,6 +14,16 @@ namespace SimpleEchoBot.Models
         public string AreaOfProblem;
         public string CategoryOfProblem;
         public string Description;
-        public List<string> attachmentUrls;
+
+        public SupportTicket()
+        {
+            this.AccountUrl = null;
+            this.UserName = null;
+            this.EmailAddress = null;
+            this.MobileNumber = null;
+            this.AreaOfProblem = null;
+            this.CategoryOfProblem = null;
+            this.Description = null;
+        }
     }
 }
