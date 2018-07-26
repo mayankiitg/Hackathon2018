@@ -1,0 +1,62 @@
+﻿{
+	"$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+	"type": "AdaptiveCard",
+	"version": "1.0",
+	"body": [
+		{
+			"type": "Container",
+			"items": [
+				{
+					"type": "TextBlock",
+					"text": "Your Support Ticket Summary",
+					"weight": "bolder",
+					"size": "medium"
+				}
+			]
+		},
+		{
+			"type": "Container",
+					"items": [
+						{
+							"type": "FactSet",
+							"facts": [
+								{
+									"title": "Name",
+									"value": "NameParamater"
+								},
+								{
+									"title": "Email",
+									"value": "EmailParameter"
+								},
+								{
+									"title": "ProblemType",
+									"value": "ProblemTypeParameter"
+								},
+								{
+									"title": "Category",
+									"value": "CategoryTypeParameter"
+								}
+							]
+						},
+							{
+								"type": "TextBlock",
+								"text": "Description",
+								"wrap": true,
+								"weight": "bolder"
+							},
+						{
+							"type": "TextBlock",
+							"text": "DescriptionParameter",
+							"wrap": true
+						}
+					]
+		}
+	],
+	"actions": [
+		{
+			"type": "Action.OpenUrl",
+			"title": "Your Support Ticket",
+			"url": "UrlParameter"
+		}
+	]
+}

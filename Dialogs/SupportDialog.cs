@@ -32,6 +32,7 @@ public class SupportDialog : IDialog<object>
     private string Description;
     private string ProblemType;
     private string Category;
+    private const string SupportTicketCardJSONSchemaPath = "Resources/SupportTicketAdaptiveCard.json";
 
     public async Task StartAsync(IDialogContext context)
     {
@@ -54,20 +55,20 @@ public class SupportDialog : IDialog<object>
         {
             var contactInfo = activity.Value;
             var response = Utils.convertResponseToMap(contactInfo);
-            
+
             if (validatedata(contactInfo, out errorInfo))
             {
-                
+
                 await context.Forward(MakeSupportFormDialog(), resumeAfterSupportFormDialog, activity, CancellationToken.None);
             }
             else
             {
-                if(this.retries < 3)
+                if (this.retries < 3)
                 {
                     this.retries++;
                     await this.DisplayContactCard(context, errorInfo);
                     context.Wait(this.MessageReceivedAsync);
-                    
+
                 }
                 else
                 {
@@ -81,11 +82,14 @@ public class SupportDialog : IDialog<object>
             this.Description = Utils.convertResponseToMap(activity.Value)[Constants.Description];
             JToken value;
             string accountUrl = "";
-            if ( context.Activity.From.Properties.TryGetValue("host", out value))
+
+            if (context.Activity.From.Properties.TryGetValue("host", out value))
             {
                 accountUrl = value.ToString();
             }
-            SupportTicket ticket = new SupportTicket() {
+
+            SupportTicket ticket = new SupportTicket()
+            {
                 AccountUrl = accountUrl,
                 UserName = this.UserName,
                 EmailAddress = this.EmailAddress,
@@ -95,11 +99,15 @@ public class SupportDialog : IDialog<object>
             };
 
             var supportTicketUrl = WorkItemUtils.CreateSupportTicket(ticket);
-            await DisplaySupportTicketCard(context, supportTicketUrl);
+            //await AdaptiveCardUtils.DisplayAdaptiveCard(context, SupportTicketCardJSONSchemaPath);
+
+            await DisplaySupportTicketCard(context, supportTicketUrl, ticket);
             context.Done(true);
             return;
         }
     }
+
+
 
     private async Task resumeAfterSupportFormDialog(IDialogContext context, IAwaitable<SupportForm> result)
     {
@@ -107,7 +115,7 @@ public class SupportDialog : IDialog<object>
         ProblemType = formResult.problemTypeOptions.ToString();
         Category = formResult.category;
         state = SupportDialogState.SupportFormDone;
-        AdaptiveCardUtils.DisplayAdaptiveCard(context, "Resources/DescriptionAdaptiveCard.json");
+        await AdaptiveCardUtils.DisplayAdaptiveCard(context, "Resources/DescriptionAdaptiveCard.json");
         context.Wait(this.MessageReceivedAsync);
     }
 
@@ -125,13 +133,13 @@ public class SupportDialog : IDialog<object>
         {
             this.UserName = variables[Constants.ContactDetailsName];
         }
-        
+
         try
         {
             var email = new System.Net.Mail.MailAddress(variables[Constants.ContactDetailsEmail]);
             this.EmailAddress = email.Address;
         }
-        catch(Exception)
+        catch (Exception)
         {
             success = false;
             builder.AppendLine("Please enter a valid email address");
@@ -148,10 +156,10 @@ public class SupportDialog : IDialog<object>
         await context.PostAsync(replyMessage);
     }
 
-    private async Task DisplaySupportTicketCard(IDialogContext context, string supportUrl)
+    private async Task DisplaySupportTicketCard(IDialogContext context, string supportUrl, SupportTicket ticket)
     {
         var replyMessage = context.MakeMessage();
-        Attachment attachment = GetSupportTicketCard(supportUrl);
+        Attachment attachment = GetSupportTicketCard(supportUrl, ticket);
         replyMessage.Attachments = new List<Attachment> { attachment };
         await context.PostAsync(replyMessage);
     }
@@ -170,13 +178,13 @@ public class SupportDialog : IDialog<object>
         // Get card from result
 
         AdaptiveCard card = result.Card;
-        if(errorInfo != null)
+        if (errorInfo != null)
         {
             var columns = card.Body.OfType<AdaptiveColumnSet>().First();
             var InputItems = columns.Columns.First().Items.OfType<AdaptiveTextInput>();
             var textItems = columns.Columns.First().Items.OfType<AdaptiveTextBlock>();
 
-            foreach(var item in InputItems)
+            foreach (var item in InputItems)
             {
                 if (this.EmailAddress != null && item.Id == Constants.ContactDetailsEmail)
                 {
@@ -186,7 +194,7 @@ public class SupportDialog : IDialog<object>
                 else if (this.UserName != null && item.Id == Constants.ContactDetailsName)
                 {
                     item.Value = this.UserName;
-                }              
+                }
             }
 
             foreach (var item in textItems)
@@ -213,20 +221,39 @@ public class SupportDialog : IDialog<object>
         return attachment;
     }
 
+    private Attachment GetSupportTicketCard(string supportUrl, SupportTicket ticket)
+    {
+        string json;
+        using (StreamReader r = new StreamReader(System.AppDomain.CurrentDomain.BaseDirectory + SupportTicketCardJSONSchemaPath))
+        {
+            json = r.ReadToEnd();
+        }
+        json = json.Replace("NameParamater", ticket.UserName);
+        json = json.Replace("EmailParameter", ticket.EmailAddress);
+        json = json.Replace("ProblemTypeParameter", ticket.AreaOfProblem);
+        json = json.Replace("CategoryTypeParameter", ticket.CategoryOfProblem);
+        json = json.Replace("DescriptionParameter", ticket.Description);
+        json = json.Replace("UrlParameter", supportUrl);
+        // json = String.Format(json, ticket.UserName, ticket.EmailAddress, ticket.AreaOfProblem, ticket.CategoryOfProblem, ticket.Description);
+
+        // Parse the JSON 
+        AdaptiveCardParseResult result = AdaptiveCard.FromJson(json);
+
+        var card = result.Card;
+
+
+
+        Attachment attachment = new Attachment()
+        {
+            ContentType = AdaptiveCard.ContentType,
+            Content = card
+        };
+
+        return attachment;
+    }
+
     private static IDialog<SupportForm> MakeSupportFormDialog()
     {
         return Chain.From(() => FormDialog.FromForm(SupportForm.BuildForm));
     }
-
-    public static Attachment GetSupportTicketCard(string supportTicketUrl)
-    {
-        var heroCard = new HeroCard
-        {
-            Text = "Your support ticket has been created. You can view the status of the ticket here.",
-            Buttons = new List<CardAction> { new CardAction(ActionTypes.OpenUrl, title: "Your support ticket", value: supportTicketUrl) }
-        };
-
-        return heroCard.ToAttachment();
-    }
-
 }

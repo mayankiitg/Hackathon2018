@@ -58,7 +58,7 @@ namespace SimpleEchoBot.Dialogs
             ProblemTypeCategoryMapping = new Dictionary<ProblemTypeOptions, List<string>>();
             ProblemTypeCategoryMapping[ProblemTypeOptions.BuildAndRelease] = new List<string>() { "Running Builds", "Configuration Service Endpoints", "Deploy Tasks", "Agent Pools and Queues", "Azure Deployment" };
             ProblemTypeCategoryMapping[ProblemTypeOptions.VersionControl] = new List<string>() { "Brancing and Merging", "Git", "Deploy Tasks", "CodeLens", "Code Review", "Source Code Incorrect or Missing", "Team Foundation Version Control" };
-            ProblemTypeCategoryMapping[ProblemTypeOptions.WorkItems] = new List<string>() { "Backlogs", "Boards", "Charts", "Work Item Performance", "Query Designer", "Customizing Work Tracking", "," };
+            ProblemTypeCategoryMapping[ProblemTypeOptions.WorkItems] = new List<string>() { "Backlogs", "Boards", "Charts", "Work Item Performance", "Query Designer", "Customizing Work Tracking"};
             ProblemTypeCategoryMapping[ProblemTypeOptions.Notification] = new List<string>() { "Build Notifications", "Code Review", "Request Feedback", "Work Item Performance", "Query Designer", "Customizing Work Tracking", "Work Item Permissions" };
         }
     }

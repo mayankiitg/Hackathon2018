@@ -244,6 +244,7 @@
     <Content Include="Resources\ContactAdaptiveCard.json" />
     <Content Include="Resources\FeedbackAdaptiveCard.json" />
     <Content Include="Resources\DescriptionAdaptiveCard.json" />
+    <Content Include="Resources\SupportTicketAdaptiveCard.json" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
