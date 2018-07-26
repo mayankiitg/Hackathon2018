@@ -1,14 +1,25 @@
 ﻿using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
+using Newtonsoft.Json;
+using SimpleEchoBot.Models;
 using SimpleEchoBot.Utils;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SimpleEchoBot.Dialogs
 {
+    public class a
+    {
+        Dictionary<string, string> dict;
+    }
+
     [Serializable]
     public class FeedbackDialog : IDialog<object>
     {
+        //public FeedbackData feedbackdata;
+
         public async Task StartAsync(IDialogContext context)
         {
             context.Wait(MessageReceivedAsync);
@@ -36,8 +47,14 @@ namespace SimpleEchoBot.Dialogs
         {
             if (value != null)
             {
-                var children = value.Children<Newtonsoft.Json.Linq.JToken>();
+                var children = value.Children<Newtonsoft.Json.Linq.JToken>().ToList();
+                foreach(var child in children)
+                {
+                     //var val = child.Value<string>("Category");
+                }
+                //FeedbackData feedback = JsonConvert.DeserializeObject<FeedbackData>(children.First());
                 //Save the information here
+                //feedbackdata = new FeedbackData();
                 return true;
             }
 

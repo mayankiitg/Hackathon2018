@@ -5,5 +5,10 @@
         public string Category;
         public int Rating;
         public string Description;
+
+        public FeedbackData()
+        {
+
+        }
     }
 }

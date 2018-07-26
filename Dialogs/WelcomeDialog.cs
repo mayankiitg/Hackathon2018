@@ -66,7 +66,7 @@ namespace SimpleEchoBot.Dialogs
                 // list of  Large Image  
                 //Images = new List<CardImage> { new CardImage("http://csharpcorner.mindcrackerinc.netdna-cdn.com/UploadFile/AuthorImage/jssuthahar20170821011237.jpg") },
                 // list of buttons   
-                Buttons = new List<CardAction> { new CardAction(ActionTypes.PostBack, title: "Support", value: "Support"), new CardAction(ActionTypes.ImBack, title: "Feedback", value:  "Feedback") }
+                Buttons = new List<CardAction> { new CardAction(ActionTypes.PostBack, title: "Support", value: "Support"), new CardAction(ActionTypes.PostBack, title: "Feedback", value:  "Feedback") }
             };
 
             return heroCard.ToAttachment();

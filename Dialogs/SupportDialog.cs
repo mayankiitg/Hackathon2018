@@ -9,6 +9,7 @@ using SimpleEchoBot.Dialogs;
 using Microsoft.Bot.Builder.FormFlow;
 using System.Threading;
 using SimpleEchoBot.Utils;
+using SimpleEchoBot.Models;
 
 public enum SupportDialogState
 {
@@ -55,7 +56,21 @@ public class SupportDialog : IDialog<object>
         }
         else if (this.state == SupportDialogState.SupportFormDone)
         {
+            SupportTicket ticket = new SupportTicket() {
+                AccountUrl = "",
+                UserName = "",
+                EmailAddress = "",
+                MobileNumber = "",
+                AreaOfProblem = "",
+                CategoryOfProblem = "",
+                Description = "asdsad",
+                attachmentUrls = null
+            };
 
+            var workItem = WorkItemUtils.CreateSupportTicket(ticket);
+            await context.PostAsync("Your support ticket has been created, you can track it using the following url:"+ workItem.Url);
+            context.Done(true);
+            return;
         }
     }
 
