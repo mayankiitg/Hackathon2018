@@ -113,6 +113,7 @@ namespace SimpleEchoBot.Dialogs
             ProblemTypeCategoryMapping[ProblemTypeOptions.Notification] = new List<string>() { "Build Notifications", "Code Review", "Request Feedback", "Work Item Performance", "Query Designer", "Customizing Work Tracking", "Work Item Permissions" };
         }
     }
+
     public enum StateNames
     {
         DialogStart, // will ask for contact

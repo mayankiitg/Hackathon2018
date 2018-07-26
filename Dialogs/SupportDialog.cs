@@ -13,6 +13,7 @@ using SimpleEchoBot.Models;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 public enum SupportDialogState
 {
@@ -28,7 +29,6 @@ public class SupportDialog : IDialog<object>
     protected int retries = 0;
     private string UserName;
     private string EmailAddress;
-    private string MobileNumber;
     private string Description;
     private string ProblemType;
     private string Category;
@@ -77,15 +77,20 @@ public class SupportDialog : IDialog<object>
         }
         else if (this.state == SupportDialogState.SupportFormDone)
         {
+            JToken value;
+            string accountUrl = "";
+            if ( context.Activity.From.Properties.TryGetValue("host", out value))
+            {
+                accountUrl = value.ToString();
+            }
             SupportTicket ticket = new SupportTicket() {
-                AccountUrl = "",
+                AccountUrl = accountUrl,
                 UserName = "",
                 EmailAddress = "",
                 MobileNumber = "",
                 AreaOfProblem = "",
                 CategoryOfProblem = "",
-                Description = "asdsad",
-                attachmentUrls = null
+                Description = "asdsad"
             };
 
             var workItem = WorkItemUtils.CreateSupportTicket(ticket);
@@ -118,7 +123,6 @@ public class SupportDialog : IDialog<object>
         {
             this.UserName = variables[Constants.ContactDetailsName];
         }
-        this.MobileNumber = variables[Constants.ContactDetailsPhone];
         
         try
         {
@@ -131,14 +135,6 @@ public class SupportDialog : IDialog<object>
             builder.AppendLine("Please enter a valid email address");
         }
 
-        if(Regex.Match(variables[Constants.ContactDetailsPhone], @"^(\+[0-9]{9})$").Success)
-        {
-            this.MobileNumber = variables[Constants.ContactDetailsPhone];
-        }
-        else
-        {
-            builder.AppendLine("Please enter a valid mobile number");
-        }
         errorInfo = builder.ToString();
         return success;
     }
@@ -179,10 +175,6 @@ public class SupportDialog : IDialog<object>
                     item.Value = this.EmailAddress;
                 }
 
-                else if (this.MobileNumber != null && item.Id == Constants.ContactDetailsPhone)
-                {
-                    item.Value = this.MobileNumber;
-                }
                 else if (this.UserName != null && item.Id == Constants.ContactDetailsName)
                 {
                     item.Value = this.UserName;
@@ -197,11 +189,6 @@ public class SupportDialog : IDialog<object>
                     item.Color = AdaptiveTextColor.Warning;
                 }
 
-                else if (this.MobileNumber == null && item.Id == Constants.ContactDetailsPhoneText)
-                {
-                    item.Text = "Mobile number should be valid";
-                    item.Color = AdaptiveTextColor.Warning;
-                }
                 else if (this.UserName == null && item.Id == Constants.ContactDetailsNameText)
                 {
                     item.Text = "Name should be valid";

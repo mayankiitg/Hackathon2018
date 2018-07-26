@@ -46,13 +46,14 @@ namespace SimpleEchoBot.Dialogs
         {
             var replyMessage = context.MakeMessage();
             //replyMessage.Text = "User: " + context.Activity.From.Id + "," + context.Activity.From.Name + "Url: " + context.Activity.ServiceUrl;
-            Attachment attachment = GetProfileHeroCard(); 
+            Attachment attachment = GetProfileHeroCard(context); 
             replyMessage.Attachments = new List<Attachment> { attachment };
             await context.PostAsync(replyMessage);
         }
 
-        public static Attachment GetProfileHeroCard()
+        public static Attachment GetProfileHeroCard(IDialogContext context)
         {
+            string user = context.Activity.From.Id;
             var heroCard = new HeroCard
             {
                 // title of the card  
@@ -62,7 +63,7 @@ namespace SimpleEchoBot.Dialogs
                 // navigate to page , while tab on card  
                 //Tap = new CardAction(ActionTypes.OpenUrl, "Learn More", value: "http://www.devenvexe.com"),
                 //Detail Text  
-                Text = "Hi User, How may I help you today?",
+                Text = "Hi " + user + ", How may I help you today?",
                 // list of  Large Image  
                 //Images = new List<CardImage> { new CardImage("http://csharpcorner.mindcrackerinc.netdna-cdn.com/UploadFile/AuthorImage/jssuthahar20170821011237.jpg") },
                 // list of buttons   

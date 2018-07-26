@@ -39,17 +39,6 @@
               "id": "email",
               "placeholder": "johndoe@example.com",
               "style": "email"
-            },
-            {
-              "id" : "phoneText",
-              "type": "TextBlock",
-              "text": "Phone Number"
-            },
-            {
-              "type": "Input.Text",
-              "id": "phone",
-              "placeholder": "XXXXXXXXXX",
-              "style": "tel"
             }
           ]
         }
